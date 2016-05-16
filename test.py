@@ -31,14 +31,14 @@ from neicio.readstation import readStation
 from setup import initialize
 from loop import main
 from realizations import realizations
-from getGrids import getGridfromArg
-from openquake.hazardlib.geo.geodetic import distance
 
+# Start MPI
 start_time = time.time()
 comm = MPI.COMM_WORLD
 size = comm.Get_size()
 my_rank = comm.Get_rank()
 
+# Variables
 voi = 'pga'
 radius = [45]
 num_realizations = 10
@@ -69,7 +69,6 @@ if my_rank == 0:
     print variables['K'], 'stations', variables['M']*variables['N'], 'data points'
 
 initialization_time = time.time() - start_time
-
 if my_rank == 0:
     print 'Initialization time', initialization_time
 

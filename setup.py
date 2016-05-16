@@ -42,53 +42,41 @@ def initialize(shakegrid, unc_INTRA, unc_INTER, stationdata, dir, voi, method, d
     event_attr= shakegrid.getEventDict()
 
     # Determine the size of the grid                                                                
-    #m = grid_attr['nlat']
-    #n = grid_attr['nlon']
     m = grid_attr.ny
     n = grid_attr.nx
-
-    # M,N number of vertical, horizontal points considered
     M = int(math.floor(m/dm))
     N = int(math.floor(n/dn))
 
     # Determine number of stations
     K = np.size(stationdata['lat'])
 
+    # Compute the bias and use to determine uncertainty
     bias = ComputeBias(dir+'uncertainty.xml')
-
     if bias == True:
-        uncertainty = unc_INTRA.getData()
-        #uncertainty = unc_INTRA.griddata
+        uncertainty1 = unc_INTRA.getData()
     else:
         rand = np.random.randn()
-        uncertainty = np.sqrt(np.power(rand*unc_INTER.griddata,2) + np.power(unc_INTRA.griddata,2))
+        uncertainty1 = np.sqrt(np.power(rand*unc_INTER.griddata,2) + np.power(unc_INTRA.griddata,2))
 
     # Allocate matrices for storing data and locations
-    #DATA = shakemap.griddata
     DATA = shakemap.getData()
     site_SM = []
     location_lat_g = np.zeros([M,N])
     location_lon_g = np.zeros([M,N])
+    uncertainty = np.zeros([M,N])
+    DATA = np.zeros([M,N])
 
-
-
-    uncertainty1 = np.zeros([M,N])
-    DATA1 = np.zeros([M,N])
     for i in range(0, M):
         for j in range(0, N):
-            uncertainty1[i, j] = uncertainty[dm*i,dn*j]
-            DATA1[i/dm, j] = DATA[dm*i,dn*j]
+            uncertainty[i, j] = uncertainty1[dm*i,dn*j]
+            DATA[i/dm, j] = DATA[dm*i,dn*j]
             location_lat_g[i/dm, j/dn], location_lon_g[i/dm, j/dn] = grid_attr.getLatLon(i,j)
-                #location_lon_g[i/dm, j/dn] = grid_attr['lon'][dm*i,dn*j]
-    uncertainty = uncertainty1
-    DATA = DATA1
 
     # Puts griddata into Site class, then turns the sites into a SiteCollection
     for i in range(0,M):
         for j in range(0,N):
             site_SM.append(Site(location = Point(location_lon_g[i,j], location_lat_g[i,j]), 
                                 vs30 = 760, vs30measured = True, z1pt0 = 100, z2pt5 = 1))
-
     site_collection_SM = SiteCollection(site_SM)
 
     # Store lat lon points
@@ -131,6 +119,11 @@ def initialize(shakegrid, unc_INTRA, unc_INTER, stationdata, dir, voi, method, d
                 'dist_to_fault':dist_to_fault}
 
 def ComputeBias(uncertainty):
+    ''' ComputeBias
+    INPUTS:
+    uncertainty- file name of uncertainty.xml
+    OUTPUTS: Boolean
+    '''
     root = minidom.parse(uncertainty)
     evu = root.getElementsByTagName('event_specific_uncertainty')
     for instance in evu:

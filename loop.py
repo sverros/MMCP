@@ -6,6 +6,29 @@ from openquake.hazardlib.geo.geodetic import geodetic_distance
 from openquake.hazardlib.imt import from_string
 
 def main(var, r, voi, cor_model, vs_corr):
+    '''
+    Function main. Uses grid information to compute covariance matrices
+    INPUTS:
+    var - variables dictionary, output from initialize function
+    r- radius
+    voi- variable of interest, i.e., 'pga'
+    cor_model- currently 'JB2009'
+    vs_corr- boolean associated with cor_model
+
+    OUTPUTS: dictionary containing the following
+    grid_arr- array of all grid array values, note that these are all combined into one large array
+            these are indices that each grid point depends on
+    mu_arr- array of all mu arrays, note that these are all combined into one large array
+            Sig12.T*Sig11inv
+    sigma_arr- array of R values
+    list_sizes_grid- The number of elements of grid_arr belonging to each grid point 
+    list_sizes_mu- The number of elements of mu)arr belonging to each grid point
+
+    EXAMPLE: If your grid array for the first 5 entries were as follows:
+           [0], [0,1], [0, 1, 2], [0, 1, 2, 3], [1, 2, 3, 4]
+           your grid_arr would be [0, 0, 1, 0, 1, 2, 0, 1, 2, 3, 1, 2, 3, 4]
+           and list_sizes_grid would be [1, 2, 3, 4, 4]
+    '''
     
     start_time = time.time()
 
@@ -432,16 +455,6 @@ def inc_stations(j, i, N, K, r, site_collection_SM,
         dist_mat = np.concatenate((station_distance_matrix[:, np.size(inc_sta_indices):], dist_mat), axis=0)
         dist_mat = np.concatenate((station_distance_matrix.T, dist_mat), axis=1)
 
-#        # x: vector of previously calculated covariance values
-#        x = np.concatenate((np.zeros([np.size(inc_sta_indices),1]),X[inc_ind,0]), axis = 0)
-#        x = np.mat(x[0:-1])
-#
-#    else:
-#        # x: vector of previously calculated covariance values
-#        x = X[inc_ind,0]
-#        x = np.mat(x[0:-1])
-
-    
     return {'dist_mat':dist_mat, 'inc_sta_indices':inc_sta_indices}
 
 def reduce_distance(j, vert, hor, added_vert, N, distance_matrix, grid_indices):

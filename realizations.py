@@ -11,6 +11,7 @@ import time
 
 def realizations(total_real, my_reals, radius, variables, grid_arr, mu_arr, sigma_arr, list_sizes_grid, list_sizes_mu,
                  compute_loss, shakegrid, voi, comm, multiple_maps, plot_on, dir, method):
+    
 
     num_realizations = np.size(my_reals)
     if num_realizations == 0:
