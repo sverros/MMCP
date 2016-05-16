@@ -114,13 +114,13 @@ def initialize(shakegrid, unc_INTRA, unc_INTER, stationdata, dir, voi, method, d
     site_both = site_station + site_SM
     site_collection_both = SiteCollection(site_both)
 
-    mesh = Mesh(location_lon_g, location_lat_g, np.zeros([M,N]))
-    fault = Fault.readFaultFile(dir+'fault.txt')
-    quads = fault.getQuadrilaterals()
-    
-    dist_to_fault = np.reshape(getDistance(method, mesh, quads), [M,N])
+    #mesh = Mesh(location_lon_g, location_lat_g, np.zeros([M,N]))
+    #fault = Fault.readFaultFile(dir+'fault.txt')
+    #quads = fault.getQuadrilaterals()
+    #
+    #dist_to_fault = np.reshape(getDistance(method, mesh, quads), [M,N])
 
-    #dist_to_fault = distance(event_attr['lat'], event_attr['lon'], event_attr['depth'], location_lat_g, location_lon_g, np.zeros([M,N]))
+    dist_to_fault = distance(event_attr['lat'], event_attr['lon'], event_attr['depth'], location_lat_g, location_lon_g, np.zeros([M,N]))
 
     return {'M': M, 'N': N, 'K': K, 'uncertaintydata':uncertainty, \
                 'site_collection_SM':site_collection_SM, \

@@ -365,7 +365,7 @@ def calculate_corr(dist_mat, voi, CM):
     Sig12, Sig11inv- partitions of correlation matrix
     R - Sqrt of sigma
     """
-    correlation_model = CM._get_correlation_model(dist_mat, from_string(voi.upper()))
+    correlation_model = CM._get_correlation_model(dist_mat, from_string(voi))
     
     Sig11 = np.mat(correlation_model[0:-1, 0:-1])
     Sig12 = np.mat(correlation_model[0:-1, -1]).T

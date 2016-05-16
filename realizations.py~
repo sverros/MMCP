@@ -107,8 +107,8 @@ def realizations(total_real, my_reals, radius, variables, grid_arr, mu_arr, sigm
         if np.mod(j+1, 25) == 0:
             print "Done with", j+1, "of", num_realizations, "iterations."
     
-    # make estimates.xml for Correlation matrix and data_new
-    
+            
+
 
     g = open('fats_econs_my_rank%i_%i.txt'%(my_rank, num_realizations), 'w')
     for j in range(0, num_realizations):
