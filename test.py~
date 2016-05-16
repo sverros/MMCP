@@ -33,6 +33,7 @@ from loop import main
 from realizations import realizations
 from getGrids import getGridfromArg
 from openquake.hazardlib.geo.geodetic import distance
+from write_output import write_estimates_xml
 
 start_time = time.time()
 comm = MPI.COMM_WORLD
