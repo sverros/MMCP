@@ -28,8 +28,9 @@ imt is the intensity measure, distance_measure is the appropriate ShakeMap dista
 and N is the number of realizations
 """
 
-# Start MPI
 start_time = time.time()
+
+# Start MPI
 comm = MPI.COMM_WORLD
 size = comm.Get_size()
 my_rank = comm.Get_rank()
@@ -44,15 +45,15 @@ parser.add_argument('method', metavar='distance_measure', type=str,
                    help='distance measure, i.e., rjb, rrup')
 parser.add_argument('num_realizations', metavar='N', type = int, 
                    help='number of realizations')
-
 args = parser.parse_args()
-
 direc = args.direc
 num_realizations = args.num_realizations
 voi = args.voi
 method = args.method
 
+# Constant variables
 radius = [15]
+# For now the correlation model is constant, as openquake only include this correlation model. 
 corr_model = 'JB2009'
 vscorr = True
 
@@ -66,31 +67,29 @@ stationlist = direc+'stationlist.xml'
 stationdata = readStation(stationlist)
 
 # Initialize the grid
-if my_rank == 0:
-    print('Calling initialize')
-
+# In this step we use the ShakeMap outputs to determine the grid points, grid spacing, site collections, 
+# station data, and other initial values
 variables = initialize(shakegrid, unc_INTRA, unc_INTER, stationdata, direc, voi, method)
 if my_rank == 0:
     print(variables['K'], 'stations', variables['M']*variables['N'], 'data points')
-
 initialization_time = time.time() - start_time
 if my_rank == 0:
     print('Initialization time', initialization_time)
 
 # Compute the grid, mu, and sigma arrays
-if my_rank == 0:
-    print('Calling main')
+# In this step, we use the correlation model to compute the covariance matrices for each point on the 
+# ShakeMap grid. This computation is done in parallel
 out = main(variables, radius, voi, corr_model, vscorr)
-
 main_time = time.time()-  start_time - initialization_time
 if my_rank == 0:
     print('Main time', main_time)
 
 # Compute realizations of the random field
+# After computing the covariance matrices for each point, we can compute realizations of the random
+# fields. If multiple cores are used, each core needs the data for every point on the grid.
 if num_realizations == 1:
     # Master will compute this single realization
     if my_rank == 0:
-        print('Computing realizations')
         data = realizations(1, 1, radius, variables, 
                             out['grid_arr'], out['mu_arr'], 
                             out['sigma_arr'], out['list_sizes_grid'], out['list_sizes_mu'],
@@ -125,4 +124,6 @@ else:
 
 realization_time = time.time() - start_time - initialization_time - main_time
 if my_rank == 0:
-    print('realization time', realization_time)
+    print('Realization time', realization_time)
+
+# Output is stored in data_files folder

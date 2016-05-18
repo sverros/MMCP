@@ -1,5 +1,8 @@
 # MMCP
 
+This code can be used to generated spatially correlated random fields for ShakeMap. 
+
+
 Dependencies:
 
 numpy:  http://www.numpy.org/

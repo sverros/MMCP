@@ -31,7 +31,6 @@ def initialize(shakegrid, unc_INTRA, unc_INTER, stationdata, dir, voi, method, d
         site_collection_station- site collection for station data
         location_lat/lon_g- lat and lons for grid data, for plotting
         data- ShakeMap data at each point
-        itensity- factor for non-native data
         site_collection_both- site collection for both SM and stations
     """
 
