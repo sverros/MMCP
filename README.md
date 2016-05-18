@@ -60,6 +60,10 @@ This code is written with MPI and must be executed with the mpiexec command. The
 Execute with: mpiexec -n xx python test.py path imt distance_measure N
 where xx is the number of cores.
 
+For example, to run with 4 cores, where ../my_path/input/ is the path to the input folder, 'pgv' is the intensity measure, 'rjb' is used and 1,000 realizations need to be computed, run with 
+
+mpiexec -n 4 python test.py '../my_path/input/' 'pga' 'rjb' 1000
+
 Outputs:
 
 The outputs are stored in hdf5 files in the data_files folder. If a single grid.xml is used, then the ShakeMap with added variability will be written to file (SVSM_*.hdf5), otherwise the random fields will be written to file (Epsilon_*.hdf5). The * is used to denote the rank of the core that wrote the output.

@@ -5,39 +5,42 @@ This code can be used to generated spatially correlated random fields for ShakeM
 
 Dependencies
 ------------
+  * numpy:  http://www.numpy.org/
+  * mpi4py: http://pythonhosted.org/mpi4py/ 
 
-	* numpy:  http://www.numpy.org/
-	* mpi4py: http://pythonhosted.org/mpi4py/
-	  * Install with conda: conda install --channel mpi4py mpich mpi4py 
+Install with conda: conda install --channel mpi4py mpich mpi4py 
 
-mapio:  http://github.com/usgs/MapIO
-	Install by using pip with git:
-       	pip install git+git://github.com/usgs/MapIO.git
+  * mapio:  http://github.com/usgs/MapIO 
 
-shakemap: https://github.com/usgs/shakemap
-	Install by using pip with git:
-	pip install git+git://github.com/usgs/shakemap.git
+Install by using pip with git: pip install git+git://github.com/usgs/MapIO.git
 
-openquake: http://www.globalquakemodel.org/openquake/about/
-	Install by using pip with git:
-       	pip install git+git://github.com/gem/oq-hazardlib.git
+  * shakemap: https://github.com/usgs/shakemap
 
-geos (required for openquake):
-     Install with:
-     conda install geos
+Install by using pip with git: pip install git+git://github.com/usgs/shakemap.git
 
-h5py: http://docs.h5py.org/en/latest/quick.html#quick
-      Install with:
-      conda install h5py
+  * openquake: http://www.globalquakemodel.org/openquake/about/
+
+Install by using pip with git: pip install git+git://github.com/gem/oq-hazardlib.git
+
+  * geos (required for openquake):
+
+Install with: conda install geos
+
+  * h5py: http://docs.h5py.org/en/latest/quick.html#quick
+
+Install with: conda install h5py
 
 
-Installation:
+Installation
+------------
 
 Install with pip with git:
-        pip install git+git://github.com/sverros/MMCP.git
+        
+pip install git+git://github.com/sverros/MMCP.git
 
 
-Running Code:
+Running Code
+------------
 
 Inputs:
 
@@ -47,13 +50,10 @@ of files in the input folder, and store each subsequent set (grid, stationlist, 
 
 The variables that need to be specified when running this code are as follows:
     
-path: The path to the input directory
-
-imt: The intensity measure of interest. Should be a string, i.e., 'pga'
-
-distance_measure: The distance measure for the site-to-fault distance, i.e., 'rjb'
-
-N: The number of realizations to be computed.
+  * path: The path to the input directory
+  * imt: The intensity measure of interest. Should be a string, i.e., 'pga'
+  * distance_measure: The distance measure for the site-to-fault distance, i.e., 'rjb'
+  * N: The number of realizations to be computed.
 
 This code is written with MPI and must be executed with the mpiexec command. The number of cores is specified at run-time.
 
