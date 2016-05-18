@@ -1,0 +1,31 @@
+import h5py
+import matplotlib.pyplot as plt
+#import cartopy
+from matplotlib import cm
+import matplotlib.colors as clors
+from matplotlib.colors import LinearSegmentedColormap
+
+f = h5py.File('SVSM_0.hdf5', 'r')
+
+dset = f['realization_0']
+data = dset[:]
+
+
+
+fig = plt.figure(figsize=(10,10))
+#cartopy.feature.COASTLINE.scale = '50m'
+#cartopy.feature.LAND.scale = '50m'
+#cartopy.feature.OCEAN.scale = '50m'
+#ax.add_feature(cartopy.feature.OCEAN,facecolor=WATER_COLOR)
+#ax.add_feature(cartopy.feature.COASTLINE)
+#ax.add_feature(cartopy.feature.BORDERS, linestyle=':',zorder=10)
+#ax.gridlines(crs=proj, draw_labels=True, linestyle='-')
+#ax.set_extent(shakemap.getRange())
+map = plt.imshow(data)
+#locstr = attributes['event']['event_description']
+#mag = attributes['event']['magnitude']
+#datestr = attributes['event']['event_timestamp'].strftime('%b %d, %Y %H:%M:%S')
+#th = plt.title('Correlation Matrix (%i)\n %s - M%.1f\n %s, units epsilon' % (number, locstr,mag,voi), y = 1.08)
+#ch=plt.colorbar(map, shrink=0.6, pad = 0.1)
+plt.savefig('epsilon%i.png'%0)
+plt.close(fig)

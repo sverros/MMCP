@@ -1,36 +1,32 @@
+from mpi4py import MPI
+import numpy as np
+import time
+import sys
+import argparse
+from mapio.shake import ShakeGrid
+from mapio.multiple import MultiGrid
+from readstation import readStation
+from setup import initialize
+from loop import main
+from realizations import realizations
+
 """
 Parallel code for computing the spatial correlation for a ShakeMap,
 adding to a ShakeMap grid, and computing multiple realizations
 VARIABLES:
     voi - variable of interest, i.e. PGA
-    r - radius of influence
     num_realization- integer for desired number of realizations
-    corr_model- JB2009 or GA2010
-    vs_corr- Vs30 correlated bool, see JB2009
-    plot_on- boolean plotting value
-    compute_loss- boolean for loss computation
-    multiple_maps- integer, for shakemaps that are situated exactly
-    ontop of one another
     method- string for distance measure
     input data- grid.xml, uncertainty.xml, and stationlist.xml
-        stored in Inputs directory
-        
+        stored in Inputs directory. fault.txt and event.xml should also
+        be stored in this directory.
 mpi4py is used for parallelization
 File may be run using:
-mpiexec -n # python test.py
-where # is the desired number of processors
+mpiexec -n # python test.py path imt distance_measure N
+where # is the desired number of processors, path is the path to the input folder, 
+imt is the intensity measure, distance_measure is the appropriate ShakeMap distance measure, 
+and N is the number of realizations
 """
-from mpi4py import MPI
-import numpy as np
-import time
-import sys
-from mapio.shake import ShakeGrid
-from mapio.multiple import MultiGrid
-from neicio.readstation import readStation
-#from neicio.shake import ShakeGrid
-from setup import initialize
-from loop import main
-from realizations import realizations
 
 # Start MPI
 start_time = time.time()
@@ -38,17 +34,27 @@ comm = MPI.COMM_WORLD
 size = comm.Get_size()
 my_rank = comm.Get_rank()
 
-# Variables
-voi = 'pga'
-radius = [45]
-num_realizations = 10
+# Get variables
+parser = argparse.ArgumentParser(description='Run Method of Successive Conditional Simulations to compute realizations of a spatially correlated random field')
+parser.add_argument('direc', metavar='path', type=str, 
+                   help='path to the inputs directory')
+parser.add_argument('voi', metavar='imt', type=str, 
+                   help='intensity measure, i.e., pga')
+parser.add_argument('method', metavar='distance_measure', type=str, 
+                   help='distance measure, i.e., rjb, rrup')
+parser.add_argument('num_realizations', metavar='N', type = int, 
+                   help='number of realizations')
+
+args = parser.parse_args()
+
+direc = args.direc
+num_realizations = args.num_realizations
+voi = args.voi
+method = args.method
+
+radius = [15]
 corr_model = 'JB2009'
 vscorr = True
-plot_on = True
-compute_loss = True
-multiple_maps = 4
-method = 'rjb'
-direc = '/Users/sverros/Documents/Modules/MM_CP/input/'
 
 # Get shakemap for desired variable, PGA, uncertainty grid and stationdata
 shakegrid = ShakeGrid.load(direc + 'grid.xml', adjust='res')
@@ -56,39 +62,39 @@ shakemap = shakegrid.getLayer(voi)
 unc_grid = ShakeGrid.load(direc + 'uncertainty.xml', adjust = 'res')
 unc_INTRA = unc_grid.getLayer('gmpe_intra_std%s' % voi)
 unc_INTER = unc_grid.getLayer('gmpe_inter_std%s' % voi)
-### UPDATE!
 stationlist = direc+'stationlist.xml'
 stationdata = readStation(stationlist)
 
 # Initialize the grid
 if my_rank == 0:
-    print 'Calling initialize'
+    print('Calling initialize')
 
 variables = initialize(shakegrid, unc_INTRA, unc_INTER, stationdata, direc, voi, method)
 if my_rank == 0:
-    print variables['K'], 'stations', variables['M']*variables['N'], 'data points'
+    print(variables['K'], 'stations', variables['M']*variables['N'], 'data points')
 
 initialization_time = time.time() - start_time
 if my_rank == 0:
-    print 'Initialization time', initialization_time
+    print('Initialization time', initialization_time)
 
 # Compute the grid, mu, and sigma arrays
 if my_rank == 0:
-    print 'Calling main'
+    print('Calling main')
 out = main(variables, radius, voi, corr_model, vscorr)
 
 main_time = time.time()-  start_time - initialization_time
 if my_rank == 0:
-    print 'main time', main_time
+    print('Main time', main_time)
 
+# Compute realizations of the random field
 if num_realizations == 1:
     # Master will compute this single realization
     if my_rank == 0:
-        print 'Computing realizations'
+        print('Computing realizations')
         data = realizations(1, 1, radius, variables, 
                             out['grid_arr'], out['mu_arr'], 
                             out['sigma_arr'], out['list_sizes_grid'], out['list_sizes_mu'],
-                            compute_loss, shakemap, voi, comm, multiple_maps, plot_on, direc, method)
+                            shakegrid, voi, comm, direc, method)
 else:
     # Master broadcasts the arrays to the other cores
     if my_rank == 0:
@@ -115,8 +121,8 @@ else:
     # Each core does a set of realizations
     data = realizations(num_realizations, my_reals, radius, variables,
                         grid_arr, mu_arr, sigma_arr, list_sizes_grid, list_sizes_mu,
-                        compute_loss, shakemap, voi, comm, multiple_maps, plot_on, direc, method)
+                        shakegrid, voi, comm, direc, method)
 
 realization_time = time.time() - start_time - initialization_time - main_time
 if my_rank == 0:
-    print 'realization time', realization_time
+    print('realization time', realization_time)

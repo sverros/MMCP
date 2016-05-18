@@ -3,12 +3,12 @@ import math
 from openquake.hazardlib.site import Site, SiteCollection
 from openquake.hazardlib.geo import Point
 from openquake.hazardlib.geo.geodetic import distance
-from xml.dom import minidom
-import sys
-sys.path.insert(0, '/Users/sverros/Documents/Modules/shakemap/shakemap')
-from shakelib.fault import Fault
-from shakelib.distance import getDistance
 from openquake.hazardlib.geo.mesh import Mesh
+from xml.dom import minidom
+from shakemap.grind.fault import Fault
+from shakemap.grind.distance import get_distance
+from shakemap.grind.source import Source, read_event_file
+
 
 def initialize(shakegrid, unc_INTRA, unc_INTER, stationdata, dir, voi, method, dm=1, dn=1):
     """
@@ -59,7 +59,7 @@ def initialize(shakegrid, unc_INTRA, unc_INTER, stationdata, dir, voi, method, d
         uncertainty1 = np.sqrt(np.power(rand*unc_INTER.griddata,2) + np.power(unc_INTRA.griddata,2))
 
     # Allocate matrices for storing data and locations
-    DATA = shakemap.getData()
+    DATA1 = shakemap.getData()
     site_SM = []
     location_lat_g = np.zeros([M,N])
     location_lon_g = np.zeros([M,N])
@@ -69,7 +69,7 @@ def initialize(shakegrid, unc_INTRA, unc_INTER, stationdata, dir, voi, method, d
     for i in range(0, M):
         for j in range(0, N):
             uncertainty[i, j] = uncertainty1[dm*i,dn*j]
-            DATA[i/dm, j] = DATA[dm*i,dn*j]
+            DATA[i/dm, j] = DATA1[dm*i,dn*j]
             location_lat_g[i/dm, j/dn], location_lon_g[i/dm, j/dn] = grid_attr.getLatLon(i,j)
 
     # Puts griddata into Site class, then turns the sites into a SiteCollection
@@ -102,11 +102,15 @@ def initialize(shakegrid, unc_INTRA, unc_INTER, stationdata, dir, voi, method, d
     site_both = site_station + site_SM
     site_collection_both = SiteCollection(site_both)
 
-    mesh = Mesh(location_lon_g, location_lat_g, np.zeros([M,N]))
     fault = Fault.readFaultFile(dir+'fault.txt')
-    quads = fault.getQuadrilaterals()
+    g = open(dir+'event.xml', 'r')
+    event = read_event_file(g)
+    g.close()
+    source = Source(event, fault)
     
-    dist_to_fault = np.reshape(getDistance(method, mesh, quads), [M,N])
+    dist = get_distance(method, np.reshape(location_lat_g, [M*N,1]), np.reshape(location_lon_g, [M*N,1]), 
+                                 np.zeros([M*N,1]), source)
+    dist_to_fault = np.reshape(dist[method], [M,N])
 
     #dist_to_fault = distance(event_attr['lat'], event_attr['lon'], event_attr['depth'], location_lat_g, location_lon_g, np.zeros([M,N]))
 

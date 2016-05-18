@@ -1,30 +1,60 @@
 import numpy as np
 import copy
-from model_losses import model_loss, initialize_loss, model_econ, MMI_conv2
+import os
+import h5py
 from mapio.shake import ShakeGrid
-#from neicio.shake import ShakeGrid
 from openquake.hazardlib.geo.geodetic import distance
-from neicio.readstation import readStation
+from readstation import readStation
 from setup import initialize
-from plotting import plot, plot_fats, plot_econ, plot_intensity
-import time
+
 
 def realizations(total_real, my_reals, radius, variables, grid_arr, mu_arr, sigma_arr, list_sizes_grid, list_sizes_mu,
-                 compute_loss, shakegrid, voi, comm, multiple_maps, plot_on, dir, method):
-
+                 shakegrid, voi, comm, dir, method):    
+    '''
+    Function realizations uses output from the main function in loop.py to compute realizations of the spatially variable random field.
+    INPUTS:
+        total_real- total number of realizations assigned to each core
+        my_reals- which realizations each core is computing
+        radius- radius of influence
+        variable- output from initialize function in setup.py
+        grid_arr- array of all grid array values, note that these are all combined into one large array
+            these are indices that each grid point depends on
+        mu_arr- array of all mu arrays, note that these are all combined into one large array
+            Sig12.T*Sig11inv
+        sigma_arr- array of R values
+        list_sizes_grid- The number of elements of grid_arr belonging to each grid point
+        list_sizes_mu- The number of elements of mu)arr belonging to each grid point
+        shakegrid- shakegrid object
+        voi- intensity measure
+        comm- mpi communicator
+        dir- path to inputs foler
+        method- method for computing distances
+    OUTPUTS:
+        Outputs are saved to a file. If multiple grid.xml files are used, the epsilon matrices will be saved to file. Otherwise realizations
+        of the spatially variable ShakeMap will be saved.
+    '''
     num_realizations = np.size(my_reals)
     if num_realizations == 0:
         return
-
     my_rank = comm.Get_rank()
     size = comm.Get_size()
 
-    #if multiple_maps > 0:
-    #    plot_fault = True
-    #else:
-    #    plot_fault = False
+    # Determine if multiple grid.xml files are to be used.
+    multiple_maps = 0
+    isd = True
+    while isd == True:
+        isd = os.path.isdir(dir + '/%i'%(multiple_maps+1))
+        if isd == True:
+            multiple_maps += 1
 
-    shakemap = shakegrid.get_Layers(voi)
+    if multiple_maps > 0:
+        write_correlation = True
+        filename = 'data_files/Epsilon_%i.hdf5'%my_rank
+    else:
+        write_correlation = False
+        filename = 'data_files/SVSM_%i.hdf5'%my_rank
+
+    shakemap = shakegrid.getLayer(voi)
     N = variables['N']
     M = variables['M']
 
@@ -39,35 +69,45 @@ def realizations(total_real, my_reals, radius, variables, grid_arr, mu_arr, sigm
     data['map0'] = variables['data']
     sm_dict['map0'] = shakemap
 
-    if compute_loss == True:
-        init_dict, ccodes, fats, bestest = {},{},{},{}
-        init_dict['map0'] = init_loss_outputs(sm_dict['map0'], voi, my_rank, variables['dist_to_fault'], event_attr['magnitude'])
-        ccodes ['map0'] = [None]*num_realizations
-        fats   ['map0'] = [None]*num_realizations
-        bestest['map0'] = [None]*num_realizations
-    
     for i in range(1, multiple_maps+1):
         folder = '%i/'%i
-        sm_dict['map%i'%i] = ShakeGrid(dir+folder+'grid.xml', variable = '%s' % voi)
-        attr = sm_dict['map%i'%i].getAttributes()
-        event_attr = attr['event']
-        unc_INTRA = ShakeGrid(dir+folder+'uncertainty.xml', variable = 'GMPE_INTRA_STD%s' % voi)
-        unc_INTER = ShakeGrid(dir+folder+'uncertainty.xml', variable = 'GMPE_INTER_STD%s' % voi)
+        sm_grid = ShakeGrid.load(dir+folder+'grid.xml', adjust = 'res')
+        sm_dict['map%i'%i] = sm_grid.getLayer(voi)
+        event_attr = sm_grid.getEventDict()
+        unc_grid = ShakeGrid.load(dir+folder+'uncertainty.xml', adjust = 'res')
+        unc_INTRA = unc_grid.getLayer('gmpe_intra_std%s' % voi)
+        unc_INTER = unc_grid.getLayer('gmpe_inter_std%s' % voi)
         stationlist = dir+folder+'stationlist.xml'
         stationdata = readStation(stationlist)
-        variables = initialize(sm_dict['map%i'%i], unc_INTRA, unc_INTER, stationdata, dir, method)
+        variables = initialize(sm_grid, unc_INTRA, unc_INTER, stationdata, dir, voi, method)
         uncertaintydata["map{0}".format(i)] = variables['uncertaintydata']
         data["map{0}".format(i)] = variables['data']
 
-        if compute_loss == True:
-            init_dict['map%i'%i] = init_loss_outputs(sm_dict['map%i'%i], voi, my_rank, variables['dist_to_fault'], event_attr['magnitude'])
-            ccodes ['map%i'%i] = [None]*num_realizations
-            fats   ['map%i'%i] = [None]*num_realizations
-            bestest['map%i'%i] = [None]*num_realizations
-    
     list_size_mu = np.reshape(list_sizes_mu, [M*N,1])
     list_size_grid = np.reshape(list_sizes_grid, [M*N,1])
     sigma_arr = np.reshape(sigma_arr, [M*N,1])
+
+    f = h5py.File(filename, 'w')
+    f.attrs['Conventions'] = 'COARDS, CF-1.5'
+    f.attrs['title'] = 'filename'
+    f.attrs['history'] = 'Created with python MultiHazardGrid.save(%s)' % filename
+    f.attrs['GMT_version'] = 'NA'
+
+    xvar = np.linspace(grid_attr.xmin,grid_attr.xmax,grid_attr.nx)
+    yvar = np.linspace(grid_attr.ymin,grid_attr.ymax,grid_attr.ny)
+    x = f.create_dataset('x',data=xvar,compression='gzip',shape=xvar.shape,dtype=str(xvar.dtype))
+    x.attrs['CLASS'] = 'DIMENSION_SCALE'
+    x.attrs['NAME'] = 'x'
+    x.attrs['_Netcdf4Dimid'] = 0 #no idea what this is
+    x.attrs['long_name'] = 'x'
+    x.attrs['actual_range'] = np.array((xvar[0],xvar[-1]))
+    
+    y = f.create_dataset('y',data=yvar,compression='gzip',shape=yvar.shape,dtype=str(yvar.dtype))
+    y.attrs['CLASS'] = 'DIMENSION_SCALE'
+    y.attrs['NAME'] = 'y'
+    y.attrs['_Netcdf4Dimid'] = 1 #no idea what this is
+    y.attrs['long_name'] = 'y'
+    y.attrs['actual_range'] = np.array((yvar[0],yvar[-1]))
 
     for j in range(0, num_realizations):
         X = np.zeros([M*N,1])
@@ -83,160 +123,22 @@ def realizations(total_real, my_reals, radius, variables, grid_arr, mu_arr, sigm
             X[i] = mu + rand_arr * sigma_arr[i]
 
         COR = np.reshape(X, [M,N])
-        
-        for i in range(0, multiple_maps+1):
-            xx = 'map%i'%i
-            X = np.multiply(COR, uncertaintydata[xx])
-            DATA_NEW = data[xx]*np.exp(X)
-            # Only save 1 realization
-            if j == num_realizations-1:
-                data_new["map{0}".format(i)] = DATA_NEW
-            if compute_loss == True:
-                expobj = copy.deepcopy(init_dict[xx]['expobj'])
-                mmi_data = MMI_conv2(DATA_NEW, voi, variables['dist_to_fault'], event_attr['magnitude'])
+        layerkey = 'realization_%i'%j
 
-                fat_loss = model_loss(mmi_data, sm_dict[xx], expobj)
-                expobj = copy.deepcopy(init_dict[xx]['expobj'])
-                econ_est = model_econ(mmi_data, sm_dict[xx], expobj)
-                ccodes_temp, fats_temp = [], []
+        if write_correlation == True:
+            dset = f.create_dataset(layerkey,data=COR,compression='gzip')
+            dset.attrs['long_name'] = layerkey
 
-                ccodes[xx][j] = fat_loss['ccodes']
-                fats[xx][j] = np.sum(fat_loss['fats'])
-                bestest[xx][j] = econ_est['BestEstimate']
+        else:
+            for i in range(0, multiple_maps+1):
+                xx = 'map%i'%i
+                X = np.multiply(COR, uncertaintydata[xx])
+                DATA_NEW = data[xx]*np.exp(X)
+                dset = f.create_dataset(layerkey,data=DATA_NEW,compression='gzip')
+                dset.attrs['long_name'] = layerkey
 
         if np.mod(j+1, 25) == 0:
-            print "Done with", j+1, "of", num_realizations, "iterations."
+            print('Done with', j+1, 'of', num_realizations, 'iterations.')
+
+    f.close()
     
-    # make estimates.xml for Correlation matrix and data_new
-    
-
-    g = open('fats_econs_my_rank%i_%i.txt'%(my_rank, num_realizations), 'w')
-    for j in range(0, num_realizations):
-        g.write(str(fats['map0'][j]) + '\n')
-        g.write(str(bestest['map0'][j]) + '\n')
-
-    g.close()
-
-
-    #if plot_on == True:
-    #    if compute_loss == True:
-    #        loss_data = {}
-    #        for i in range(0, multiple_maps+1):
-    #            xx = 'map%i'%i
-    #            data_dict = {'ccodes':ccodes[xx], 'fats':fats[xx], 'bestest':bestest[xx]}
-    #            loss_data[xx] = gather_results(total_real, my_reals, my_rank, data_dict, size, comm)
-    #
-    #        if my_rank == 0:
-    #            econ_xy_lim = np.zeros(4)
-    #            fats_xy_lim = np.zeros(4)
-    #            fats_xy_lim[0] = np.min(loss_data['map0']['fats'])
-    #            econ_xy_lim[0] = np.min(loss_data['map0']['bestest'])
-    #
-    #            for i in range(0, multiple_maps+1):
-    #                xx = 'map%i'%i
-    #            # compute x,y ranges for histogram plots
-    #                if np.min(loss_data[xx]['fats']) < fats_xy_lim[0]:
-    #                    fats_xy_lim[0] = np.min(loss_data[xx]['fats'])
-    #                if init_dict[xx]['loss_dict']['lkm20'] < fats_xy_lim[0]:
-    #                    fats_xy_lim[0] = init_dict[xx]['loss_dict']['lkm20']-2
-    #                if np.max(loss_data[xx]['fats']) > fats_xy_lim[1]:
-    #                    fats_xy_lim[1] = np.max(loss_data[xx]['fats'])
-    #                if init_dict[xx]['loss_dict']['lkp20'] > fats_xy_lim[1]:
-    #                    fats_xy_lim[1] = init_dict[xx]['loss_dict']['lkp20']+2
-    #                if np.min(loss_data[xx]['bestest']) < econ_xy_lim[0]:
-    #                    econ_xy_lim[0] = np.min(loss_data[xx]['bestest'])
-    #                if init_dict[xx]['loss_dict']['ekbm20'] < econ_xy_lim[0]:
-    #                    econ_xy_lim[0] = init_dict[xx]['loss_dict']['ekbm20']
-    #                if np.max(loss_data[xx]['bestest']) > econ_xy_lim[1]:
-    #                    econ_xy_lim[1] = np.max(loss_data[xx]['bestest'])
-    #                if init_dict[xx]['loss_dict']['ekbp20'] > econ_xy_lim[1]:
-    #                    econ_xy_lim[1] = init_dict[xx]['loss_dict']['ekbp20']
-    #            econ_xy_lim[3] = total_real/3
-    #            fats_xy_lim[3] = total_real/3
-    #            fats_int = (fats_xy_lim[1]-fats_xy_lim[0])/30
-    #            econ_int = (econ_xy_lim[1]-econ_xy_lim[0])/30
-    #            econ_xy_lim[0] -= econ_int
-    #            econ_xy_lim[1] += econ_int
-    #
-    #            for i in range(0, multiple_maps+1):
-    #                xx = 'map%i'%i
-    #                plot_fats(fats_xy_lim, fats_int, loss_data[xx]['fats'],
-    #                          init_dict[xx]['loss_dict'], i)
-    #
-    #                plot_econ(econ_xy_lim, econ_int, loss_data[xx]['bestest'],
-    #                          init_dict[xx]['loss_dict'], i)
-    #
-    #    for i in range(0, multiple_maps+1):
-    #        if my_rank == 0:
-    #            plotting_data = {'cor':COR, 'data':sm_dict['map%i'%i], 'data_new':data_new['map%i'%i]}
-    #            plot(plotting_data, variables, voi, sm_dict['map%i'%i], stationdata, i, plot_fault)     
-    #            MMI_sm = MMI_conv2(sm_dict['map%i'%i].griddata, voi, variables['dist_to_fault'], event_attr['magnitude'])
-    #            MMI_dn = MMI_conv2(data_new['map%i'%i], voi, variables['dist_to_fault'], event_attr['magnitude'])
-    #            plot_intensity(MMI_sm, MMI_dn, sm_dict['map%i'%i], i, plot_fault)
-                
-
-def gather_results(total_real, my_reals, my_rank, data, size, comm):
-
-    if my_rank == 0:
-        ccodes = [None]*total_real
-        fats = [None]*total_real
-        bestest = [None]*total_real
-        for xx in range(0, np.size(my_reals)):
-            ccodes[my_reals[xx]]  = data['ccodes'][xx]
-            fats[my_reals[xx]]    = data['fats'][xx]
-            bestest[my_reals[xx]] = data['bestest'][xx]
-        for xx in range(1, size):
-            for realz in np.arange(xx, total_real, size):
-                ccodes[realz] = comm.recv(source = xx, tag = 11*xx*realz)
-                fats[realz]   = comm.recv(source = xx, tag = 13*xx*realz)
-                bestest[realz]   = comm.recv(source = xx, tag = 15*xx*realz)
-            
-        print 'Mean/std. dev. fatalities:', np.mean(fats), np.std(fats), '\n'
-        print 'Economic Losses, average (dollars):'
-        print 'Best estimate:', np.mean(bestest)
-
-        loss_data= {'ccodes':ccodes, 'fats':fats, 'bestest':bestest}
-    else:
-        for xx in range(0, np.size(my_reals)):
-            comm.send(data['ccodes'][xx], dest = 0, tag = 11*my_rank*my_reals[xx])
-            comm.send(data['fats'][xx], dest = 0, tag = 13*my_rank*my_reals[xx])
-            comm.send(data['bestest'][xx], dest = 0, tag = 15*my_rank*my_reals[xx])
-        loss_data = None
-
-    return loss_data
-
-def init_loss_outputs(shakemap, voi, my_rank, dist, mag):
-    expobj, outgrid = initialize_loss(shakemap, voi, dist, mag)
-    if my_rank == 0:
-        smdata = shakemap.griddata.copy()
-        data = MMI_conv2(smdata, voi,  dist, mag)
-        loss = model_loss(data, shakemap, expobj)
-        lk = sum([int(loss['fats'][i]) for i in range(0, np.size(loss['fats']))])
-        print lk
-        loss = model_loss(data*1.2, shakemap, expobj)
-        lkp20 = sum([int(loss['fats'][i]) for i in range(0, np.size(loss['fats']))])
-        loss = model_loss(data*0.8, shakemap, expobj)
-        lkm20 = sum([int(loss['fats'][i]) for i in range(0, np.size(loss['fats']))])
-        loss = model_loss(data*1.1, shakemap, expobj)
-        lkp10 = sum([int(loss['fats'][i]) for i in range(0, np.size(loss['fats']))])
-        loss = model_loss(data*0.9, shakemap, expobj)
-        lkm10 = sum([int(loss['fats'][i]) for i in range(0, np.size(loss['fats']))])
-        loss = model_econ(data, shakemap, expobj)
-        ekb = loss['BestEstimate']
-        loss = model_econ(data*1.2, shakemap, expobj)
-        ekbp20 = loss['BestEstimate']
-        loss = model_econ(data*0.8, shakemap, expobj)
-        ekbm20 = loss['BestEstimate']
-        loss = model_econ(data*1.1, shakemap, expobj)
-        ekbp10 = loss['BestEstimate']
-        loss = model_econ(data*0.9, shakemap, expobj)
-        ekbm10 = loss['BestEstimate']
-        
-        loss_dict = {'lk':lk, 'lkp20':lkp20,'lkm20':lkm20,'lkp10':lkp10,'lkm10':lkm10,
-                     'ekb':ekb,'ekbp20':ekbp20, 'ekbm20':ekbm20, 'ekbp10':ekbp10,'ekbm10':ekbm10}
- 
-    else:
-        loss_dict = {}
-    expobj, outgrid = initialize_loss(shakemap, voi, dist, mag)
-
-    return {'loss_dict':loss_dict, 'expobj':expobj}

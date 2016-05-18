@@ -76,8 +76,8 @@
 >
 ]>
 <shakemap-data code_version="3.5" map_version="1">
-<earthquake id="shakeout_sdtj2015_hybrid_tj_nodirec_se" lat="32.53400" lon="-117.14600" mag="6.9" year="2015" month="4" day="30" hour="18" minute="0" second="0" timezone="UTC" depth="7.7" network="us" locstring="Shakeout 2015 SD-TJ Scenario (Wills 2015 Hybrid Vs30 + TJ Overlay)" created="1456769319" />
-<stationlist created="1456769319">
+<earthquake id="shakeout_sdtj2015_hybrid_tj_nodirec_se" lat="32.53400" lon="-117.14600" mag="6.9" year="2015" month="4" day="30" hour="18" minute="0" second="0" timezone="UTC" depth="7.7" network="us" locstring="Shakeout 2015 SD-TJ Scenario (Wills 2015 Hybrid Vs30 + TJ Overlay)" created="1456769370" />
+<stationlist created="1456769370">
 
 </stationlist>
 </shakemap-data>

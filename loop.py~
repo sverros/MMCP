@@ -455,16 +455,6 @@ def inc_stations(j, i, N, K, r, site_collection_SM,
         dist_mat = np.concatenate((station_distance_matrix[:, np.size(inc_sta_indices):], dist_mat), axis=0)
         dist_mat = np.concatenate((station_distance_matrix.T, dist_mat), axis=1)
 
-#        # x: vector of previously calculated covariance values
-#        x = np.concatenate((np.zeros([np.size(inc_sta_indices),1]),X[inc_ind,0]), axis = 0)
-#        x = np.mat(x[0:-1])
-#
-#    else:
-#        # x: vector of previously calculated covariance values
-#        x = X[inc_ind,0]
-#        x = np.mat(x[0:-1])
-
-    
     return {'dist_mat':dist_mat, 'inc_sta_indices':inc_sta_indices}
 
 def reduce_distance(j, vert, hor, added_vert, N, distance_matrix, grid_indices):

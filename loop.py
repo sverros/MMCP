@@ -117,7 +117,7 @@ def main(var, r, voi, cor_model, vs_corr):
                     list_sizes_mu[it*N+j] = int(np.size(mu_arr [it*N+j]))
 
             if np.mod(i*N+j,5000) == 0:
-                print 'Finishing step:', i*N+j
+                print('Finishing step:', i*N+j)
 
 
     # Reshape grid and mu_arr into vector of values. Store number of entries in each in new vector, list_sizes
@@ -142,7 +142,7 @@ def main(var, r, voi, cor_model, vs_corr):
     loop_time = time.time() - set_up_time - start_time
 
     if my_rank == 0:
-        print 'Loop time', loop_time
+        print('Loop time', loop_time)
 
     # Send gathered information to master                                                                                                                      
     for rank in range(1,size):                                                                                                                                 
@@ -356,7 +356,7 @@ def main(var, r, voi, cor_model, vs_corr):
     comm.Barrier()
     send_time = time.time() - loop_time - set_up_time - start_time
     if my_rank == 0:
-        print 'Send time', send_time
+        print('Send time', send_time)
         return {'grid_arr':full_grid_arr, 'mu_arr':full_mu_arr, 'sigma_arr':full_sigma_arr, 
                 'list_sizes_grid':full_list_sizes_grid, 'list_sizes_mu':full_list_sizes_mu}
 

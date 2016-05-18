@@ -190,7 +190,6 @@ def plot_intensity(output1, output2, shakemap, number, plot_fault):
     attributes = shakemap.getAttributes()
     palette = make_intensity_cmap()
     bounds = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-    #norm = clors.BoundaryNorm(bounds, palette.N)
     fig = plt.figure(figsize=(10,10))
     proj = cartopy.crs.PlateCarree()
     ax = plt.axes(projection=proj)
@@ -272,7 +271,6 @@ def make_intensity_cmap():
                        (0.8, 255.0/255.0, 255.0/255.0),
                        (0.9, 255.0/255.0, 255.0/255.0),
                        (1.0, 200.0/255.0, 200.0/255.0)),
-              #(1,128, 128)),
               'green':((0,   255.0/255.0, 255.0/255.0),
                        (0.1, 255.0/255.0, 255.0/255.0),
                        (0.2, 204.0/255.0, 204.0/255.0),
@@ -284,7 +282,6 @@ def make_intensity_cmap():
                        (0.8, 145.0/255.0, 145.0/255.0),
                        (0.9,   0,   0),
                        (1.0,   0,   0)),
-              #(13,0,   0)),
               'blue': ((0,   255.0/255.0, 255.0/255.0),
                        (0.1, 255.0/255.0, 255.0/255.0),
                        (0.2, 255.0/255.0, 255.0/255.0),
@@ -296,7 +293,6 @@ def make_intensity_cmap():
                        (0.8, 0, 0),
                        (0.9, 0, 0),
                        (1.0,0, 0))}
-    #(13,0, 0))}
 
     my_cmap = LinearSegmentedColormap('my_cmap', cdict)
     return my_cmap

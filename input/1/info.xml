@@ -1,0 +1,101 @@
+<info version="2.0">
+  <section name="input" title="Inputs">
+    <subsection name="event_information" title="Event Information">
+      <depth desc="Event depth" title="Depth" units="km" value="7.7" />
+      <event_id desc="Event ID" title="ID" value="shakeout_sdtj2015_hybrid_tj_nodirec_se" />
+      <fault_ref desc="Finite fault reference(s)" title="Fault Ref(s)" value="" />
+      <faultfiles desc="Finite fault file name(s)" title="Fault File(s)" value="shakeoutsd_fault.txt" />
+      <feregion desc="Flinn Engdahl Region" title="Flinn Engdahl Region" value="Unknown" />
+      <intensity_observations desc="Number of intensity observations in input" title="Intensity Observations" value="0" />
+      <latitude desc="Event latitude" title="Latitude" units="degrees" value="32.53400" />
+      <location desc="Event location" title="Location" value="Shakeout 2015 SD-TJ Scenario (Wills 2015 Hybrid Vs30 + TJ Overlay)" />
+      <longitude desc="Event longitude" title="Longitude" units="degrees" value="-117.14600" />
+      <magnitude desc="Event magnitude" title="Magnitude" value="6.9" />
+      <mech_src desc="Mechanism source" title="Mechanism Source" value="Unknown" />
+      <origin_time desc="Event origin time" title="Origin Time" value="2015-04-30T18:00:00Z" />
+      <seismic_stations desc="Number of seismic stations in input" title="Seismic Stations" value="0" />
+      <src_mech desc="Source mechanism" title="Mechanism" value="ALL" />
+      <tectonic_regime desc="Tectonic regime" title="Tectonic Regime" value="Unknown" />
+    </subsection>
+  </section>
+  <section name="output" title="Outputs">
+    <subsection name="ground_motion_information" title="Ground Motion Information">
+      <mi_bias desc="Magnitude bias for intensity" title="Intensity Bias" value="0.00" />
+      <mi_max desc="Maximum value of intensity on land" title="Max Intensity (Land)" value="8.14" />
+      <mi_max_grid desc="Maximum value of intensity in grid" title="Max Intensity (Grid)" value="8.63" />
+      <pga_bias desc="Magnitude bias for PGA" title="PGA Bias" value="0.0000" />
+      <pga_max desc="Maximum value of PGA on land" title="Max PGA (Land)" units="percent g" value="45.67" />
+      <pga_max_grid desc="Maximum value of PGA in grid" title="Max PGA (Grid)" units="percent g" value="55.53" />
+      <pgv_bias desc="Magnitude bias for PGV" title="PGV Bias" value="0.0000" />
+      <pgv_max desc="Maximum value of PGV on land" title="Max PGV (Land)" units="cm/s" value="59.65" />
+      <pgv_max_grid desc="Maximum value of PGV in grid" title="Max PGV (Grid)" units="cm/s" value="84.33" />
+      <psa03_bias desc="Magnitude bias for PSA03" title="PSA03 Bias" value="0.0000" />
+      <psa03_max desc="Maximum value of PSA03 on land" title="Max PSA03 (Land)" units="percent g" value="103.06" />
+      <psa03_max_grid desc="Maximum value of PSA03 in grid" title="Max PSA03 (Grid)" units="percent g" value="119.89" />
+      <psa10_bias desc="Magnitude bias for PSA10" title="PSA10 Bias" value="0.0000" />
+      <psa10_max desc="Maximum value of PSA10 on land" title="Max PSA10 (Land)" units="percent g" value="66.00" />
+      <psa10_max_grid desc="Maximum value of PSA10 in grid" title="Max PSA10 (Grid)" units="percent g" value="85.96" />
+      <psa30_bias desc="Magnitude bias for PSA30" title="PSA30 Bias" value="0.0000" />
+      <psa30_max desc="Maximum value of PSA30 on land" title="Max PSA30 (Land)" units="percent g" value="23.07" />
+      <psa30_max_grid desc="Maximum value of PSA30 in grid" title="Max PSA30 (Grid)" units="percent g" value="29.10" />
+      <total_flagged_mi desc="Number of stations flagged for intensity bias" title="Flagged Intensity Observations" value="0" />
+      <total_flagged_pgm desc="Number of stations flagged for PGM bias" title="Flagged Seismic Stations" value="0" />
+    </subsection>
+    <subsection name="map_information" title="Map Information">
+      <grid_nx desc="Number of grid points in longitude" title="nx" value="106" />
+      <grid_ny desc="Number of grid points in latitude" title="ny" value="79" />
+      <lat_max desc="North boundary of ShakeMap" title="Lat Max" units="degrees latitude" value="33.5" />
+      <lat_min desc="South boundary of ShakeMap" title="Lat Min" units="degrees latitude" value="32.2" />
+      <latspan desc="Latitude span of ShakeMap" title="Lat Span" units="degrees latitude" value="2.1075" />
+      <lon_max desc="East boundary of ShakeMap" title="Lon Max" units="degrees longitude" value="-116.0" />
+      <lon_min desc="West boundary of ShakeMap" title="Lon Min" units="degrees longitude" value="-117.75" />
+      <lonspan desc="Longitude span of ShakeMap" title="Lon Span" units="degrees longitude" value="2.5" />
+      <x_grid_interval desc="Grid spacing in longitud" title="dx" units="degrees" value="0.0166666666666667" />
+      <y_grid_interval desc="Grid spacing in latitude" title="dy" units="degrees" value="0.0166666666666667" />
+    </subsection>
+    <subsection name="uncertainty" title="Uncertainty">
+      <grade desc="Empirical ShakeMap Grade" title="Grade" value="C" />
+      <mean_uncertainty desc="Mean of map uncertainty ratio (ShakeMap sigma / GMPE sigma)" title="Mean Uncertainty Ratio" value="1.00000000000000" />
+    </subsection>
+  </section>
+  <section name="processing" title="Processing Parameters">
+    <subsection name="ground_motion_modules" title="Ground Motion Modules">
+      <basin desc="Basin correction applied (yes|no)" title="Basin Correction Applied" value="no" />
+      <basin_module desc="Basin depth correction module used" reference="None" title="Basin Module" value="None" />
+      <directivity desc="Directivity applied (yes|no)" title="Directivity Applied" value="yes" />
+      <directivity_module desc="Directivity module" reference="Rowshandel (2006, 2010)" title="Directivity Module" value="Rowshandel" />
+      <gmpe desc="GMPE module" reference="Boore and Atkinson (2008)" title="GMPE" value="BA08" />
+      <ipe desc="IPE module" reference="ShakeMap Manual (2015)" title="IPE" value="DefaultIPE" />
+      <mi2pgm desc="Ground Motion/Intensity Conversion Equation module" reference="Worden et al. (2012)" title="GMICE Module" value="WGRW11" />
+      <miscale desc="Intensity scale file" title="Intensity Scale" value="scale_wgrw11.ps" />
+      <pgm2mi desc="Inverse Ground Motion/Intensity Conversion Equation module" reference="Worden et al. (2012)" title="Inverse GMICE Module" value="WGRW11" />
+    </subsection>
+    <subsection name="miscellaneous" title="Miscellaneous">
+      <bias_log_amp desc="Used log amp to compute bias (yes|no)" title="Bias Log Amp" value="yes" />
+      <bias_max_bias desc="Maximum allowed bias" title="Bias Max Bias" value="2.0" />
+      <bias_max_mag desc="Maximum magnitude to compute bias" title="Bias Max Mag" value="7.0" />
+      <bias_max_range desc="Maximum distance to include station in bias" title="Bias Max Range" units="km" value="120" />
+      <bias_min_bias desc="Minimum allowed bias" title="Bias Min Bias" value="-2.0" />
+      <bias_min_stations desc="Minimum # of stations necessary to compute bias" title="Mias Min Stations" value="6" />
+      <bias_norm desc="Norm of the bias (l1|l2)" title="Bias Norm" value="l1" />
+      <median_dist desc="Median distance used (yes|no)" title="Median Distance Used" value="no" />
+      <outlier_deviation_level desc="Outlier level" title="Outlier Deviation Level" units="# of std dev" value="3" />
+      <outlier_max_mag desc="Maximum magnitude to flag outliers" title="Outlier Max Mag" value="7.0" />
+    </subsection>
+    <subsection name="roi" title="Radius of Influence">
+      <gmdecay desc="Ground motion influence decay" title="PGM Observation Decay" units="fraction of gmroi" value="0.5" />
+      <gmroi desc="Ground motion radius of influence" title="PGM Radius of Influence" units="km" value="10k" />
+      <idecay desc="Intensity observation influence decay" title="Intensity Observation Decay" units="fraction of iroi" value="0.5" />
+      <iroi desc="Intensity observation radius of influence" title="Intensity Radius of Influence" units="km" value="10k" />
+    </subsection>
+    <subsection name="shakemap_versions" title="ShakeMap Versions">
+      <grind_time desc="Start time for event processing" title="Process Time" value="2016-02-29T18:09:20Z" />
+      <map_version desc="Map version number" title="Map Version" value="1" />
+      <shakemap_revision desc="ShakeMap source code revision number" title="Code Rev" value="3.5.1486" />
+    </subsection>
+    <subsection name="site_response" title="Site Response">
+      <site_correction desc="Site correction applied (none|disabled|Borcherdt table|old-style Borcherdt table|GMPE native)" title="Site Correction Applied" value="GMPE native" />
+      <vs30default desc="Default Vs30 for 'rock'" title="Default Vs30" units="m/s" value="686" />
+    </subsection>
+  </section>
+</info>
