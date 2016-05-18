@@ -41,7 +41,7 @@ Inputs:
 
 xml files (grid.xml, stationlist.xml, uncertainty.xml, event.xml) and fault file (fault.txt) should be in the input folder. 
 If multiple ShakeMaps are to be used (multiple sets of grid, stationlist, and uncertainty files on the EXACT SAME grid), store one set
-of files in the input folder, and store each subsequence set in a subfolder named '1', '2', etc.
+of files in the input folder, and store each subsequent set (grid, stationlist, uncertainty) in a subfolder named '1', '2', etc.
 
 The variables that need to be specified when running this code are as follows:
     
