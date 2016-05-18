@@ -5,13 +5,13 @@ This code can be used to generated spatially correlated random fields for ShakeM
 
 Dependencies
 ------------
+  * numpy:  http://www.numpy.org/
+  * mpi4py: http://pythonhosted.org/mpi4py/ 
 
-	* numpy:  http://www.numpy.org/
-	* mpi4py: http://pythonhosted.org/mpi4py/
-	  * Install with conda: conda install --channel mpi4py mpich mpi4py 
+Install with conda: conda install --channel mpi4py mpich mpi4py 
+  * mapio:  http://github.com/usgs/MapIO 
 
-mapio:  http://github.com/usgs/MapIO
-	Install by using pip with git:
+Install by using pip with git:
        	pip install git+git://github.com/usgs/MapIO.git
 
 shakemap: https://github.com/usgs/shakemap
