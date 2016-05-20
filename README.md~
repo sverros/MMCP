@@ -68,7 +68,6 @@ Test
 ----
 
 To test the installation of this method, choose a output directory such as test_output and run
-
-mpiexec -n 4 python test.py input 'pga pgv' 'rjb' 10 -out test_output
+mpiexec -n 4 python test.py input 'pga pgv' 'rjb' 10 -o test_output
 
 Data files will be stored in this directory along with sample random fields for pga and pgv.
