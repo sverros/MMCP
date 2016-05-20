@@ -9,29 +9,41 @@ from setup import initialize
 
 
 def realizations(total_real, my_reals, radius, variables, grid_arr, mu_arr, sigma_arr, list_sizes_grid, list_sizes_mu,
-                 shakegrid, voi, comm, dir, method):    
+                 shakegrid, voi, comm, dir, method, output_dir):    
     '''
     Function realizations uses output from the main function in loop.py to compute realizations of the spatially variable random field.
-    INPUTS:
-        total_real- total number of realizations assigned to each core
-        my_reals- which realizations each core is computing
-        radius- radius of influence
-        variable- output from initialize function in setup.py
-        grid_arr- array of all grid array values, note that these are all combined into one large array
-            these are indices that each grid point depends on
-        mu_arr- array of all mu arrays, note that these are all combined into one large array
-            Sig12.T*Sig11inv
-        sigma_arr- array of R values
-        list_sizes_grid- The number of elements of grid_arr belonging to each grid point
-        list_sizes_mu- The number of elements of mu)arr belonging to each grid point
-        shakegrid- shakegrid object
-        voi- intensity measure
-        comm- mpi communicator
-        dir- path to inputs foler
-        method- method for computing distances
-    OUTPUTS:
-        Outputs are saved to a file. If multiple grid.xml files are used, the epsilon matrices will be saved to file. Otherwise realizations
-        of the spatially variable ShakeMap will be saved.
+    :param total_real:
+        integer, total number of realizations assigned to each core
+    :param my_reals:
+        numpy array, which realizations each core is computing
+    :param radius:
+        float, radius of influence
+    :param variable:
+        dict, output from initialize function in setup.py
+    :param grid_arr:
+        numpy array of all grid array values, note that these are all combined into one large array
+        these are indices that each grid point depends on
+    :param mu_arr:
+        numpy array of all mu arrays, note that these are all combined into one large array
+        Sig12.T*Sig11inv
+    :param sigma_arr:
+        numpy array of R values
+    :param list_sizes_grid
+        numpy array, the number of elements of grid_arr belonging to each grid point
+    :param list_sizes_mu:
+        numpy array, the number of elements of mu)arr belonging to each grid point
+    :param shakegrid:
+        shakegrid object
+    :param voi:
+        string, intensity measure
+    :param comm:
+        mpi communicator
+    :param dir:
+        string, path to inputs folder
+    :param method:
+        string, method for computing distances
+    Outputs are saved to a file. If multiple grid.xml files are used, the epsilon matrices will be saved to file. Otherwise realizations
+    of the spatially variable ShakeMap will be saved.
     '''
     num_realizations = np.size(my_reals)
     if num_realizations == 0:
@@ -43,16 +55,17 @@ def realizations(total_real, my_reals, radius, variables, grid_arr, mu_arr, sigm
     multiple_maps = 0
     isd = True
     while isd == True:
-        isd = os.path.isdir(dir + '/%i'%(multiple_maps+1))
+        isd = os.path.isdir(os.path.join(dir,'%i'%(multiple_maps+1)))
         if isd == True:
             multiple_maps += 1
-
+            
+    # Set data file names. If multiple realizations are used, store epsilon
     if multiple_maps > 0:
         write_correlation = True
-        filename = 'data_files/Epsilon_%i.hdf5'%my_rank
+        filename = os.path.join(output_dir,'Epsilon_%s_%i.hdf5'%(voi,my_rank))
     else:
         write_correlation = False
-        filename = 'data_files/SVSM_%i.hdf5'%my_rank
+        filename = os.path.join(output_dir,'SVSM_%s_%i.hdf5'%(voi, my_rank))
 
     shakemap = shakegrid.getLayer(voi)
     N = variables['N']
@@ -64,22 +77,23 @@ def realizations(total_real, my_reals, radius, variables, grid_arr, mu_arr, sigm
     # Set up dictionaries to store data
     uncertaintydata, data, data_new, sm_dict = {},{}, {}, {}
     uncertaintydata['map0'] = variables['uncertaintydata']
-    stationlist = dir+'stationlist.xml'
+    stationlist = os.path.join(dir,'stationlist.xml')
     stationdata = readStation(stationlist)
     data['map0'] = variables['data']
     sm_dict['map0'] = shakemap
 
+    # If there are multiple maps, store other maps data
     for i in range(1, multiple_maps+1):
         folder = '%i/'%i
-        sm_grid = ShakeGrid.load(dir+folder+'grid.xml', adjust = 'res')
+        sm_grid = ShakeGrid.load(os.path.join(dir,folder,'grid.xml'), adjust = 'res')
         sm_dict['map%i'%i] = sm_grid.getLayer(voi)
         event_attr = sm_grid.getEventDict()
-        unc_grid = ShakeGrid.load(dir+folder+'uncertainty.xml', adjust = 'res')
-        unc_INTRA = unc_grid.getLayer('gmpe_intra_std%s' % voi)
-        unc_INTER = unc_grid.getLayer('gmpe_inter_std%s' % voi)
-        stationlist = dir+folder+'stationlist.xml'
+        unc_grid = ShakeGrid.load(os.path.join(dir,folder,'uncertainty.xml'), adjust = 'res')
+        stationlist = os.path.join(dir,folder,'stationlist.xml')
         stationdata = readStation(stationlist)
-        variables = initialize(sm_grid, unc_INTRA, unc_INTER, stationdata, dir, voi, method)
+        voi_list = []
+        voi_list.append(voi)
+        variables = initialize(sm_grid, unc_grid, stationdata, dir, voi_list, method)
         uncertaintydata["map{0}".format(i)] = variables['uncertaintydata']
         data["map{0}".format(i)] = variables['data']
 
@@ -87,6 +101,7 @@ def realizations(total_real, my_reals, radius, variables, grid_arr, mu_arr, sigm
     list_size_grid = np.reshape(list_sizes_grid, [M*N,1])
     sigma_arr = np.reshape(sigma_arr, [M*N,1])
 
+    # Set header information for file. Change if neccesary
     f = h5py.File(filename, 'w')
     f.attrs['Conventions'] = 'COARDS, CF-1.5'
     f.attrs['title'] = 'filename'
@@ -109,6 +124,7 @@ def realizations(total_real, my_reals, radius, variables, grid_arr, mu_arr, sigm
     y.attrs['long_name'] = 'y'
     y.attrs['actual_range'] = np.array((yvar[0],yvar[-1]))
 
+    # Compute realizations of the field, COR
     for j in range(0, num_realizations):
         X = np.zeros([M*N,1])
         for i in range(0,M*N):
@@ -125,6 +141,7 @@ def realizations(total_real, my_reals, radius, variables, grid_arr, mu_arr, sigm
         COR = np.reshape(X, [M,N])
         layerkey = 'realization_%i'%j
 
+        # Write data to file
         if write_correlation == True:
             dset = f.create_dataset(layerkey,data=COR,compression='gzip')
             dset.attrs['long_name'] = layerkey
@@ -132,8 +149,8 @@ def realizations(total_real, my_reals, radius, variables, grid_arr, mu_arr, sigm
         else:
             for i in range(0, multiple_maps+1):
                 xx = 'map%i'%i
-                X = np.multiply(COR, uncertaintydata[xx])
-                DATA_NEW = data[xx]*np.exp(X)
+                X = np.multiply(COR, uncertaintydata[xx][voi])
+                DATA_NEW = data[xx][voi]*np.exp(X)
                 dset = f.create_dataset(layerkey,data=DATA_NEW,compression='gzip')
                 dset.attrs['long_name'] = layerkey
 
