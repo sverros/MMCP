@@ -1,6 +1,6 @@
 from distutils.core import setup
 
-setup(name='MMCP',
+setup(name='MM_CP',
       version='0.1dev',
       description='Spatial Correlation Model using Multiple Maps', 
       author='Sarah Verros',
