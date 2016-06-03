@@ -6,5 +6,5 @@ setup(name='MMCP',
       author='Sarah Verros',
       author_email='sarah.verros@gmail.com',
       url='',
-      scripts = ['runner.py', 'test_mmcp.py']
+      packages['mmcp']
 )
