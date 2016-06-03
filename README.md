@@ -22,7 +22,7 @@ This code can be used to generated spatially correlated random fields for ShakeM
 
 ## Installation
 
-For now, clone with * git clone https://github.com/sverros/MMCP.git*
+For now, clone with *git clone https://github.com/sverros/MMCP.git*
 
 
 ## Running Code
