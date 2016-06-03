@@ -32,7 +32,7 @@ num_realizations = args.num_realizations
 voi = args.voi
 voi = voi.split()
 output_dir = args.output_directory
-radius = [args.rad]
+radius = args.rad
 
 # Constant variables
 # For now the correlation model is constant, as openquake only include this correlation model.

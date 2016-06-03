@@ -18,18 +18,14 @@ def run_method(direc, voi, num_realizations, radius, corr_model, vscorr, output_
     File may be run using:
     mpiexec -n # python test.py path imt distance_measure N
     where # is the desired number of processors. Required command line parameters are listed below:
-    :param direc:
+    :param path:
         string, path to directory containing grid, stationlist, uncertainty, event xmls and fault.txt
-    :param voi:
+    :param imt:
         string, intensity measures to use, i.e., 'pga pgv psa03'
+    :param distance_measure:
+        string, appropriate distance measure for the ShakeMap, i.e., 'rjb'
     :param N:
         integer, number of realizations to compute
-    :param radius:
-        integer, radius of influence
-    :param corr_model:
-        string, specifies the correlation model
-    :param vs_corr:
-        boolean, specifies whether vs30 are correlated
     :param output_dir:
         path to directory where output is stored
     """
