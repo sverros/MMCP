@@ -5,11 +5,11 @@ import h5py
 from mapio.shake import ShakeGrid
 from openquake.hazardlib.geo.geodetic import distance
 from readstation import readStation
-from setup import initialize
+from init_grid import initialize
 
 
 def realizations(total_real, my_reals, radius, variables, grid_arr, mu_arr, sigma_arr, list_sizes_grid, list_sizes_mu,
-                 shakegrid, voi, comm, dir, method, output_dir):    
+                 shakegrid, voi, comm, dir, output_dir):    
     '''
     Function realizations uses output from the main function in loop.py to compute realizations of the spatially variable random field.
     :param total_real:
@@ -40,8 +40,6 @@ def realizations(total_real, my_reals, radius, variables, grid_arr, mu_arr, sigm
         mpi communicator
     :param dir:
         string, path to inputs folder
-    :param method:
-        string, method for computing distances
     Outputs are saved to a file. If multiple grid.xml files are used, the epsilon matrices will be saved to file. Otherwise realizations
     of the spatially variable ShakeMap will be saved.
     '''
@@ -93,7 +91,7 @@ def realizations(total_real, my_reals, radius, variables, grid_arr, mu_arr, sigm
         stationdata = readStation(stationlist)
         voi_list = []
         voi_list.append(voi)
-        variables = initialize(sm_grid, unc_grid, stationdata, dir, voi_list, method)
+        variables = initialize(sm_grid, unc_grid, stationdata, dir, voi_list)
         uncertaintydata["map{0}".format(i)] = variables['uncertaintydata']
         data["map{0}".format(i)] = variables['data']
 

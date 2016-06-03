@@ -7,11 +7,11 @@ import argparse
 from mapio.shake import ShakeGrid
 from mapio.multiple import MultiGrid
 from readstation import readStation
-from setup import initialize
+from init_grid import initialize
 from loop import main
 from realizations import realizations
 
-def run_method(direc, voi, method, num_realizations, radius, corr_model, vscorr, output_dir):
+def run_method(direc, voi, num_realizations, radius, corr_model, vscorr, output_dir):
     """
     Parallel code for computing the spatial correlation for a ShakeMap,
     adding to a ShakeMap grid, and computing multiple realizations.
@@ -45,7 +45,7 @@ def run_method(direc, voi, method, num_realizations, radius, corr_model, vscorr,
     # Initialize the grid
     # In this step we use the ShakeMap outputs to determine the grid points, grid spacing, site collections, 
     # station data, and other initial values
-    variables = initialize(shakegrid, unc_grid, stationdata, direc, voi, method)
+    variables = initialize(shakegrid, unc_grid, stationdata, direc, voi)
     if my_rank == 0:
         print(variables['K'], 'stations', variables['M']*variables['N'], 'data points')
     initialization_time = time.time() - start_time
@@ -99,7 +99,7 @@ def run_method(direc, voi, method, num_realizations, radius, corr_model, vscorr,
             # Each core does a set of realizations
             data = realizations(num_realizations, my_reals, radius, variables,
                                 grid_arr, mu_arr, sigma_arr, list_sizes_grid, list_sizes_mu,
-                                shakegrid, voi[ii], comm, direc, method, output_dir)
+                                shakegrid, voi[ii], comm, direc, output_dir)
 
     realization_time = time.time() - start_time - initialization_time - main_time
     if my_rank == 0:
