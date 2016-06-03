@@ -22,7 +22,7 @@ This code can be used to generated spatially correlated random fields for ShakeM
 
 ## Installation
 
-Install with pip install: *pip install git+git://github.com/sverros/MMCP.git*
+For now, clone with * git clone https://github.com/sverros/MMCP.git*
 
 
 ## Running Code
@@ -37,18 +37,20 @@ The variables that need to be specified when running this code are as follows:
     
   * path: The path to the input directory
   * imt: The intensity measures of interest. Should be a string, i.e., 'pga pgv psa03'
-  * distance_measure: The distance measure for the site-to-fault distance, i.e., 'rjb'
   * N: The number of realizations to be computed.
 
-Optional parameters include the output directory.
+Optional parameters include the output directory and the radius of inluence. 
+
+  * output directory: the path to an output folder, flag with -out
+  * radius: the radius of influence, flag with -out
 
 This code is written with MPI and must be executed with the mpiexec command. The number of cores is specified at run-time. Execute with: 
 
-*mpiexec -n xx python test.py path imt distance_measure N -out output_directory*
+*mpiexec -n xx python run_mmcp.py path imt N -out output_directory -r radius*
 
 where xx is the number of cores. For example, to run with 4 cores, where ../my_path/input/ is the path to the input folder, 'pgv psa03' is the intensity measure, 'rjb' is used and 1,000 realizations need to be computed, run with 
 
-*mpiexec -n 4 python test.py '../my_path/input/' 'pga psa03' 'rjb' 1000*
+*mpiexec -n 4 python run_mmcp.py 'input/' 'pgv psa03' 1000*
 
 ###### Outputs
 
@@ -64,6 +66,6 @@ To plot the data, the visualizer.py script may be run. The script only plots one
 
 To test the installation of this method, choose a output directory such as test_output and run
 
-*mpiexec -n 4 python test.py input 'pga pgv' 'rjb' 10 -out test_output*
+*mpiexec -n 4 python test_mmcp.py input 'pgv psa03' 10 -out test_output*
 
-Data files will be stored in this directory along with sample random fields for pga and pgv.
+Data files will be stored in this directory along with sample random fields for pgv and psa0.3.

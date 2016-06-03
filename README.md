@@ -22,7 +22,7 @@ This code can be used to generated spatially correlated random fields for ShakeM
 
 ## Installation
 
-
+For now, clone with * git clone https://github.com/sverros/MMCP.git*
 
 
 ## Running Code
@@ -36,7 +36,7 @@ of files in the input folder, and store each subsequent set (grid, stationlist, 
 The variables that need to be specified when running this code are as follows:
     
   * path: The path to the input directory
-  * imt: The intensity measures of interest. Should be a string, i.e., 'pga pgv psa03'
+  * imt: The intensity measures of interest. Should be a string, i.e., 'pga psa10 psa03'
   * N: The number of realizations to be computed.
 
 Optional parameters include the output directory and the radius of inluence. 
@@ -50,7 +50,7 @@ This code is written with MPI and must be executed with the mpiexec command. The
 
 where xx is the number of cores. For example, to run with 4 cores, where ../my_path/input/ is the path to the input folder, 'pgv psa03' is the intensity measure, 'rjb' is used and 1,000 realizations need to be computed, run with 
 
-*mpiexec -n 4 python run_mmcp.py 'input/' 'pgv psa03' 1000*
+*mpiexec -n 4 python run_mmcp.py 'input/' 'pga psa03' 1000*
 
 ###### Outputs
 
@@ -66,6 +66,6 @@ To plot the data, the visualizer.py script may be run. The script only plots one
 
 To test the installation of this method, choose a output directory such as test_output and run
 
-*mpiexec -n 4 python test_mmcp.py input 'pgv psa03' 10 -out test_output*
+*mpiexec -n 4 python test_mmcp.py input 'pga psa03' 10 -out test_output*
 
 Data files will be stored in this directory along with sample random fields for pgv and psa0.3.
