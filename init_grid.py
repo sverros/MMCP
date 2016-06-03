@@ -6,10 +6,6 @@ from openquake.hazardlib.geo import Point
 from openquake.hazardlib.geo.geodetic import distance
 from openquake.hazardlib.geo.mesh import Mesh
 from xml.dom import minidom
-from shakemap.grind.fault import Fault
-from shakemap.grind.distance import get_distance
-from shakemap.grind.source import Source, read_event_file
-
 
 def initialize(shakegrid, unc_grid, stationdata, dir, voi, dm=1, dn=1):
     """
