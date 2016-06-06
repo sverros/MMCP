@@ -50,8 +50,8 @@ The variables that need to be specified when running this code are as follows:
 
 Optional parameters include the output directory and the radius of inluence. 
 
-  * output directory: the path to an output folder, flag with -out
-  * radius: the radius of influence, flag with -out
+  * output directory: the path to an output folder defaulting to data_files/, flag with -out
+  * radius: the radius of influence defaulting to 45 km, flag with -r
 
 This code is written with MPI and must be executed with the mpiexec command. The number of cores is specified at run-time. Execute with: 
 
@@ -78,3 +78,7 @@ To test the installation of this method, choose a output directory such as test_
 *mpiexec -n 4 python test_mmcp.py input 'pga psa03' 10 -out test_output*
 
 Data files will be stored in this directory along with sample random fields for pgv and psa0.3.
+
+For a faster test (using smaller radius), run
+
+*mpiexec -n 4 python test_mmcp.py input 'pga psa03' 10 -out test_output -r 15*

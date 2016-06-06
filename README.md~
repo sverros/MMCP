@@ -16,6 +16,8 @@ This code can be used to generated spatially correlated random fields for ShakeM
     * Install by using pip install: *pip install git+git://github.com/gem/oq-hazardlib.git*
   * h5py: http://docs.h5py.org/en/latest/quick.html#quick
     * Install with: *conda install h5py*
+  * matplotlib: http://matplotlib.org/
+    * Install with: *conda install matplotlib*
 
 ###### Dependencies for other packages included above
 
