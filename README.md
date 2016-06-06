@@ -1,6 +1,6 @@
-# MMCP
+# MMCP (Multiple Map Correlation in Parallel)
 
-This code can be used to generated spatially correlated random fields for ShakeMap. 
+This code can be used to generated spatially correlated random fields for ShakeMap. More details on the specifics of this code are provided in code_documentation_notes.txt. 
 
 ## Dependencies
 
@@ -14,15 +14,25 @@ This code can be used to generated spatially correlated random fields for ShakeM
     * Install by using pip install: *pip install git+git://github.com/usgs/shakemap.git*
   * openquake: http://www.globalquakemodel.org/openquake/about/
     * Install by using pip install: *pip install git+git://github.com/gem/oq-hazardlib.git*
-  * geos (required for openquake):
-    * Install with: *conda install geos*
   * h5py: http://docs.h5py.org/en/latest/quick.html#quick
     * Install with: *conda install h5py*
+  * matplotlib: http://matplotlib.org/
+    * Install with: *conda install matplotlib*
 
+###### Dependencies for other packages included above
+
+  * geos (required for openquake):
+    * Install with: *conda install geos*
+  * affine:
+    * Install with: *conda install affine*
+  * rasterio:
+    * Install with: *conda install rasterio*
+  * pandas:
+    * Install with: *conda install pandas*  
 
 ## Installation
 
-For now, clone with *git clone https://github.com/sverros/MMCP.git*
+Clone the repository with *git clone https://github.com/sverros/MMCP.git*
 
 
 ## Running Code
@@ -30,8 +40,7 @@ For now, clone with *git clone https://github.com/sverros/MMCP.git*
 ###### Inputs
 
 xml files (grid.xml, stationlist.xml, uncertainty.xml) should be in the input folder. 
-If multiple ShakeMaps are to be used (multiple sets of grid, stationlist, and uncertainty files on the EXACT SAME grid), store one set
-of files in the input folder, and store each subsequent set (grid, stationlist, uncertainty) in a subfolder named '1', '2', etc.
+If multiple ShakeMaps are to be used (multiple sets of grid, stationlist, and uncertainty files on the EXACT SAME grid), store one set of files in the input folder, and store each subsequent set (grid, stationlist, uncertainty) in a subfolder named '1', '2', etc.
 
 The variables that need to be specified when running this code are as follows:
     
