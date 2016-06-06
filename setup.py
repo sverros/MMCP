@@ -6,6 +6,6 @@ setup(name='mmcp',
       author='Sarah Verros',
       author_email='sarah.verros@gmail.com',
       url='',
-      py_modules = ['init_grid.py', 'loop.py', 'main.py', 'readstation.py', 'realizations.py', 'visualizer.py']
+      py_modules = ['init_grid.py', 'loop.py', 'main.py', 'readstation.py', 'realizations.py', 'visualizer.py'],
       scripts=['run_mmcp.py', 'test_mmcp.py'],
 )
